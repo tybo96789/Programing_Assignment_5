@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -47,7 +48,8 @@ public class AtiburcioTyler5 {
         private JScrollBar vBar;
 
         //Offsets
-        private final int LHS = 75;
+        private final int OFFSET_WIDTH = 20;
+        private final int OFFSET_HEIGHT = 40;
         
         public TextEditor() {
 
@@ -59,10 +61,10 @@ public class AtiburcioTyler5 {
             //Used to center the Window to the center of the screen no matter what computer you are using
             Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
             this.setMaximizedBounds(null);
-            this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
+            //this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
 
             //To adjust the size of the text area when the frame size is adjusted
-            //this.addComponentListener(new JFrameComponentAdaptor());
+            this.addComponentListener(new JFrameComponentAdaptor());
 
             //Container stuff
             this.makeContainers();
@@ -79,20 +81,19 @@ public class AtiburcioTyler5 {
         public void makeContainers() {
             //Make Text Area
             this.textArea = new JTextArea();
-            this.textArea.setPreferredSize(this.getSize());
+            //this.textArea.setPreferredSize(this.getSize());
             this.textArea.setWrapStyleWord(true);
-            this.containers.add(this.textArea);
+            //this.containers.add(this.textArea);
             
             //Make ScrollPane
             this.scrollPane = new JScrollPane(this.textArea);
-            this.getContentPane().add(this.scrollPane,BorderLayout.CENTER);
+            this.getContentPane().add(this.scrollPane);
             this.scrollPane.setAutoscrolls(true);
-            //this.scrollPane.setPreferredSize(new Dimension(50,INSTANCE.getSize().height));
-            //this.vBar = new JScrollBar();
-            //this.vBar.setPreferredSize(new Dimension(50,INSTANCE.getSize().height));
-            //this.scrollPane.add(this.vBar);
-            this.containers.add(this.scrollPane);
-            //this.scrollPane.add(this.scrollPane.createVerticalScrollBar());
+            this.scrollPane.setViewportView(this.textArea);
+            this.scrollPane.setBounds(0, 0, this.getWidth()-OFFSET_WIDTH, this.getHeight()-OFFSET_HEIGHT);
+            this.scrollPane.setPreferredSize(new Dimension(this.getWidth()-OFFSET_WIDTH, this.getHeight()-OFFSET_HEIGHT));
+            this.scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+            this.scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 
         }
         
@@ -103,9 +104,9 @@ public class AtiburcioTyler5 {
 
             @Override
             public void componentResized(java.awt.event.ComponentEvent evt) {
-                INSTANCE.textArea.setSize(INSTANCE.getSize());
-                INSTANCE.textArea.setPreferredSize(INSTANCE.getSize());
-                INSTANCE.textArea.setLocation(0, 0);
+                INSTANCE.scrollPane.setSize(new Dimension(INSTANCE.getWidth()-OFFSET_WIDTH, INSTANCE.getHeight()-OFFSET_HEIGHT));
+                INSTANCE.scrollPane.setPreferredSize(new Dimension(INSTANCE.getWidth()-OFFSET_WIDTH, INSTANCE.getHeight()-OFFSET_HEIGHT));
+                INSTANCE.scrollPane.setBounds(0, 0, INSTANCE.getWidth()-OFFSET_WIDTH, INSTANCE.getHeight()-OFFSET_HEIGHT);
 
             }
         }
