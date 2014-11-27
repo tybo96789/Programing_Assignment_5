@@ -1,3 +1,4 @@
+import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -32,7 +33,6 @@ public class AtiburcioTyler5 {
     protected static class TextEditor extends JFrame {
 
         //Frame Stuff
-
         private final int INITAL_WIDTH = 500, INITAL_HEIGHT = 500;
         protected final TextEditor INSTANCE = this;
         private final String TITLE_SUFIX = " - CSCI 2912 Editor";
@@ -46,11 +46,15 @@ public class AtiburcioTyler5 {
         private JTextArea textArea;
         private JScrollBar vBar;
 
+        //Offsets
+        private final int LHS = 75;
+        
         public TextEditor() {
 
             //Frame stuff
             this.setTitle("Untitled" + TITLE_SUFIX);
             this.setSize(INITAL_WIDTH, INITAL_HEIGHT);
+            this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
             //Used to center the Window to the center of the screen no matter what computer you are using
             Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
@@ -76,14 +80,17 @@ public class AtiburcioTyler5 {
             //Make Text Area
             this.textArea = new JTextArea();
             this.textArea.setPreferredSize(this.getSize());
+            this.textArea.setWrapStyleWord(true);
             this.containers.add(this.textArea);
             
             //Make ScrollPane
             this.scrollPane = new JScrollPane(this.textArea);
-            this.scrollPane.setPreferredSize(new Dimension(50,INSTANCE.getSize().height));
-            this.vBar = new JScrollBar();
-            this.vBar.setPreferredSize(new Dimension(50,INSTANCE.getSize().height));
-            this.scrollPane.add(this.vBar);
+            this.getContentPane().add(this.scrollPane,BorderLayout.CENTER);
+            this.scrollPane.setAutoscrolls(true);
+            //this.scrollPane.setPreferredSize(new Dimension(50,INSTANCE.getSize().height));
+            //this.vBar = new JScrollBar();
+            //this.vBar.setPreferredSize(new Dimension(50,INSTANCE.getSize().height));
+            //this.scrollPane.add(this.vBar);
             this.containers.add(this.scrollPane);
             //this.scrollPane.add(this.scrollPane.createVerticalScrollBar());
 
