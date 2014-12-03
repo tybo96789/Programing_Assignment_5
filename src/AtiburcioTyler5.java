@@ -1,12 +1,18 @@
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 
 /*
@@ -25,6 +31,7 @@ public class AtiburcioTyler5 {
     }
 
     protected static class TextEditor extends JFrame {
+        
 
         //Frame Stuff
         private final int INITAL_WIDTH = 500, INITAL_HEIGHT = 500;
@@ -39,10 +46,20 @@ public class AtiburcioTyler5 {
         private JScrollPane scrollPane;
         private JTextArea textArea;
         //private JScrollBar vBar;                                              //mark for removal
+        private JMenu menu;
+        private JMenuBar menuBar;
+        private JMenuItem newItem;
+        private JMenuItem openItem;
+        private JMenuItem saveItem;
+        private JMenuItem saveAsItem;
+        private JMenuItem exitItem;
+        
 
         //Offsets
-        private final int OFFSET_WIDTH = 5;                                     //Check if this works...
-        private final int OFFSET_HEIGHT = 25;                                   //Not sure if this is the same for different computers
+        private final int MENU_BAR_HEIGHT = 20;
+        private final int SCROLL_PANE_YOFFSET = MENU_BAR_HEIGHT;
+        private final int SCROLL_PANE_OFFSET_WIDTH = 5;                         //Check if this works...
+        private final int SCROLL_PANE_OFFSET_HEIGHT = 25 + MENU_BAR_HEIGHT;     //Not sure if this is the same for different computers
         
         public TextEditor() {
 
@@ -72,21 +89,45 @@ public class AtiburcioTyler5 {
         }
 
         public void makeContainers() {
+            //Make menu bar
+            this.menuBar = new JMenuBar();
+            this.menuBar.setPreferredSize(new Dimension(this.getWidth(),MENU_BAR_HEIGHT));
+            this.menuBar.setBounds(0, 0, this.menuBar.getWidth(), MENU_BAR_HEIGHT);
+            this.menu = new JMenu("File");
+            this.menuBar.add(this.menu);
+            this.containers.add(this.menuBar);
+            
+            //Make MenuItems
+            this.newItem = new JMenuItem("New");
+            this.openItem = new JMenuItem("Open");
+            this.saveItem = new JMenuItem("Save");
+            this.saveAsItem = new JMenuItem("Save as");
+            this.exitItem = new JMenuItem("Exit");
+            this.menu.add(this.newItem);
+            this.menu.add(this.openItem);
+            this.menu.add(this.saveItem);
+            this.menu.add(this.saveAsItem);
+            this.menu.add(this.exitItem);
+            
+            
+            
             //Make Text Area
             this.textArea = new JTextArea();
             //this.textArea.setPreferredSize(this.getSize());                   //mark for removal
             this.textArea.setWrapStyleWord(true);                               //unsure if its work
             //this.containers.add(this.textArea);                               //mark for removal
+            this.textArea.setFont(new Font(Font.MONOSPACED,Font.PLAIN,14));
             
             //Make ScrollPane
             this.scrollPane = new JScrollPane(this.textArea);
             this.getContentPane().add(this.scrollPane);
             this.scrollPane.setAutoscrolls(true);
             this.scrollPane.setViewportView(this.textArea);
-            this.scrollPane.setBounds(0, 0, this.getWidth()-OFFSET_WIDTH, this.getHeight()-OFFSET_HEIGHT);
-            this.scrollPane.setPreferredSize(new Dimension(this.getWidth()-OFFSET_WIDTH, this.getHeight()-OFFSET_HEIGHT));
+            this.scrollPane.setBounds(0, SCROLL_PANE_YOFFSET, this.getWidth()-SCROLL_PANE_OFFSET_WIDTH, this.getHeight()-SCROLL_PANE_OFFSET_HEIGHT);
+            this.scrollPane.setPreferredSize(new Dimension(this.getWidth()-SCROLL_PANE_OFFSET_WIDTH, this.getHeight()-SCROLL_PANE_OFFSET_HEIGHT));
             this.scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
             this.scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+            
             
         }
         
@@ -97,9 +138,15 @@ public class AtiburcioTyler5 {
 
             @Override
             public void componentResized(java.awt.event.ComponentEvent evt) {
-                INSTANCE.scrollPane.setSize(new Dimension(INSTANCE.getWidth()-OFFSET_WIDTH, INSTANCE.getHeight()-OFFSET_HEIGHT));
-                INSTANCE.scrollPane.setPreferredSize(new Dimension(INSTANCE.getWidth()-OFFSET_WIDTH, INSTANCE.getHeight()-OFFSET_HEIGHT));
-                INSTANCE.scrollPane.setBounds(0, 0, INSTANCE.getWidth()-OFFSET_WIDTH, INSTANCE.getHeight()-OFFSET_HEIGHT);
+                //Adjust ScrollPane Size
+                INSTANCE.scrollPane.setSize(new Dimension(INSTANCE.getWidth()-SCROLL_PANE_OFFSET_WIDTH, INSTANCE.getHeight()-SCROLL_PANE_OFFSET_HEIGHT));
+                INSTANCE.scrollPane.setPreferredSize(new Dimension(INSTANCE.getWidth()-SCROLL_PANE_OFFSET_WIDTH, INSTANCE.getHeight()-SCROLL_PANE_OFFSET_HEIGHT));
+                INSTANCE.scrollPane.setBounds(0, SCROLL_PANE_YOFFSET, INSTANCE.getWidth()-SCROLL_PANE_OFFSET_WIDTH, INSTANCE.getHeight()-SCROLL_PANE_OFFSET_HEIGHT);
+                
+                //Adjust MenuBar size
+                INSTANCE.menuBar.setSize(new Dimension(INSTANCE.getWidth(),MENU_BAR_HEIGHT));
+                INSTANCE.menuBar.setPreferredSize(new Dimension(INSTANCE.getWidth(),MENU_BAR_HEIGHT));
+                INSTANCE.menuBar.setBounds(0, 0, INSTANCE.menuBar.getWidth(), MENU_BAR_HEIGHT);            
             }
         }
 
