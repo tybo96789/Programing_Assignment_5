@@ -11,6 +11,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.StringTokenizer;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -65,6 +66,7 @@ public class AtiburcioTyler5 {
         
         //Document Stuff
         private File file;
+        private ArrayList<String> data;
 
         //Offsets
         //private final int MENU_BAR_HEIGHT = 20;                               //not needed
@@ -208,7 +210,7 @@ public class AtiburcioTyler5 {
         {
             private JFileChooser chooser = new JFileChooser();
             private Scanner fileScan = null;
-            private ArrayList<String> data = new ArrayList<String>();
+            private ArrayList<String> dataImport = new ArrayList<String>();
             private StringBuilder builder = new StringBuilder();
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -219,8 +221,8 @@ public class AtiburcioTyler5 {
                         INSTANCE.file = this.chooser.getSelectedFile();
                         if(!INSTANCE.file.isFile()) throw new Exception("Not a File");
                         this.fileScan = new Scanner(INSTANCE.file);
-                        while(this.fileScan.hasNext()) this.data.add(this.fileScan.nextLine());
-                        for(String s : this.data) this.builder.append(s).append("\n");
+                        while(this.fileScan.hasNext()) this.dataImport.add(this.fileScan.nextLine());
+                        for(String s : this.dataImport) this.builder.append(s).append("\n");
                         INSTANCE.setTitle(INSTANCE.file.getName() + INSTANCE.TITLE_SUFIX);
                         INSTANCE.textArea.setText(this.builder.toString());
                     }
@@ -247,6 +249,11 @@ public class AtiburcioTyler5 {
             
         }
         
+        private void saveDialog()
+        {
+            
+        }
+        
         private class SaveAsDocumentListener implements ActionListener
         {
 
@@ -266,7 +273,15 @@ public class AtiburcioTyler5 {
             }
             
         }
-
+        
+        private ArrayList<String> copyDataToArray()
+        {
+            ArrayList<String> temp = new ArrayList<String>();
+            StringTokenizer token = new StringTokenizer(INSTANCE.textArea.getText(),"\n",true);
+            while(token.hasMoreElements()) temp.add(token.nextToken());
+            return temp;
+        }
+        
     }
 
 }
