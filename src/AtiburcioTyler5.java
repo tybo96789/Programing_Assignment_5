@@ -1,17 +1,10 @@
-import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.WindowStateListener;
 import java.util.ArrayList;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
@@ -21,7 +14,7 @@ import javax.swing.ScrollPaneConstants;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-/**
+/**Programming Assignment 5
  *
  * @author Tyler_Atiburcio
  */
@@ -45,11 +38,11 @@ public class AtiburcioTyler5 {
         //Container Stuff
         private JScrollPane scrollPane;
         private JTextArea textArea;
-        private JScrollBar vBar;
+        //private JScrollBar vBar;                                              //mark for removal
 
         //Offsets
-        private final int OFFSET_WIDTH = 20;
-        private final int OFFSET_HEIGHT = 40;
+        private final int OFFSET_WIDTH = 5;                                     //Check if this works...
+        private final int OFFSET_HEIGHT = 25;                                   //Not sure if this is the same for different computers
         
         public TextEditor() {
 
@@ -61,7 +54,7 @@ public class AtiburcioTyler5 {
             //Used to center the Window to the center of the screen no matter what computer you are using
             Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
             this.setMaximizedBounds(null);
-            //this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
+            this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
 
             //To adjust the size of the text area when the frame size is adjusted
             this.addComponentListener(new JFrameComponentAdaptor());
@@ -81,9 +74,9 @@ public class AtiburcioTyler5 {
         public void makeContainers() {
             //Make Text Area
             this.textArea = new JTextArea();
-            //this.textArea.setPreferredSize(this.getSize());
-            this.textArea.setWrapStyleWord(true);
-            //this.containers.add(this.textArea);
+            //this.textArea.setPreferredSize(this.getSize());                   //mark for removal
+            this.textArea.setWrapStyleWord(true);                               //unsure if its work
+            //this.containers.add(this.textArea);                               //mark for removal
             
             //Make ScrollPane
             this.scrollPane = new JScrollPane(this.textArea);
@@ -94,11 +87,11 @@ public class AtiburcioTyler5 {
             this.scrollPane.setPreferredSize(new Dimension(this.getWidth()-OFFSET_WIDTH, this.getHeight()-OFFSET_HEIGHT));
             this.scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
             this.scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-
+            
         }
         
         /**
-         * Adjusts Text Area field when the JFrame size is adjusted
+         * Adjusts Text Area field (Scrollpane) when the JFrame size is adjusted
          */
         private class JFrameComponentAdaptor extends ComponentAdapter {
 
@@ -107,7 +100,6 @@ public class AtiburcioTyler5 {
                 INSTANCE.scrollPane.setSize(new Dimension(INSTANCE.getWidth()-OFFSET_WIDTH, INSTANCE.getHeight()-OFFSET_HEIGHT));
                 INSTANCE.scrollPane.setPreferredSize(new Dimension(INSTANCE.getWidth()-OFFSET_WIDTH, INSTANCE.getHeight()-OFFSET_HEIGHT));
                 INSTANCE.scrollPane.setBounds(0, 0, INSTANCE.getWidth()-OFFSET_WIDTH, INSTANCE.getHeight()-OFFSET_HEIGHT);
-
             }
         }
 
