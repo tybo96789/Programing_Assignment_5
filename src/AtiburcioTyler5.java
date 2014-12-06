@@ -8,7 +8,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.StringTokenizer;
@@ -24,6 +30,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -66,7 +73,8 @@ public class AtiburcioTyler5 {
         
         //Document Stuff
         private File file;
-        private ArrayList<String> data;
+        private ArrayList<Character> data;                                         //Check usage
+        protected boolean isModifyed = false;
 
         //Offsets
         //private final int MENU_BAR_HEIGHT = 20;                               //not needed
@@ -80,6 +88,7 @@ public class AtiburcioTyler5 {
             this.setTitle("Untitled" + TITLE_SUFIX);
             this.setSize(INITAL_WIDTH, INITAL_HEIGHT);
             this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+            this.addWindowListener(new CloseWindowListener());
 
             //Used to center the Window to the center of the screen no matter what computer you are using
             Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
@@ -152,8 +161,13 @@ public class AtiburcioTyler5 {
             this.textArea = new JTextArea();
             //this.textArea.setPreferredSize(this.getSize());                   //mark for removal
             this.textArea.setWrapStyleWord(true);                               //unsure if its work
+            //set bounds for text area
             //this.containers.add(this.textArea);                               //mark for removal
             this.textArea.setFont(new Font(Font.MONOSPACED,Font.PLAIN,14));
+            this.textArea.setLineWrap(true);                                    //Broken
+            //this.textArea.setBounds(0, 0, this.getWidth()-SCROLL_PANE_OFFSET_WIDTH, this.getHeight()-SCROLL_PANE_OFFSET_HEIGHT);
+            //this.textArea.addKeyListener(new KeyPressedListener());
+
             
             
             //Make ScrollPane
@@ -184,6 +198,9 @@ public class AtiburcioTyler5 {
                 INSTANCE.scrollPane.setPreferredSize(new Dimension(INSTANCE.getWidth()-SCROLL_PANE_OFFSET_WIDTH, INSTANCE.getHeight()-SCROLL_PANE_OFFSET_HEIGHT));
                 INSTANCE.scrollPane.setBounds(0, 0, INSTANCE.getWidth()-SCROLL_PANE_OFFSET_WIDTH, INSTANCE.getHeight()-SCROLL_PANE_OFFSET_HEIGHT);
                 
+                //INSTANCE.textArea.setBounds(0, 0, INSTANCE.getWidth()-SCROLL_PANE_OFFSET_WIDTH, INSTANCE.getHeight()-SCROLL_PANE_OFFSET_HEIGHT);
+                //INSTANCE.textArea.setLineWrap(rootPaneCheckingEnabled);
+                
                 //Adjust MenuBar size 
                 //Removed because this.setJmenubar handles menu size
                 /*
@@ -200,8 +217,35 @@ public class AtiburcioTyler5 {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                INSTANCE.textArea.setText("");
-                INSTANCE.setTitle("Untitled"+TITLE_SUFIX);
+                INSTANCE.detectChanges();
+                if(INSTANCE.isModifyed)
+                {
+                    switch(JOptionPane.showConfirmDialog(null, "Do you want to save changes?", "Hey User!", JOptionPane.YES_NO_CANCEL_OPTION))
+                {
+                    case 0:
+                    {
+                        if(INSTANCE.file != null)
+                        {
+                            INSTANCE.saveData();
+                            INSTANCE.dispose();
+                            System.exit(0);
+                            break;
+                        }
+                    }
+                    
+                    case 1:
+                    {
+                        INSTANCE.textArea.setText("");
+                        INSTANCE.setTitle("Untitled"+TITLE_SUFIX);
+                        break;
+                    }
+                }
+                }
+                else
+                {
+                    INSTANCE.textArea.setText("");
+                    INSTANCE.setTitle("Untitled"+TITLE_SUFIX);
+                }
             }
             
         }
@@ -216,7 +260,7 @@ public class AtiburcioTyler5 {
             public void actionPerformed(ActionEvent e) {
                 this.chooser.showOpenDialog(null);
                 try{
-                    if(this.chooser.getSelectedFile() != null)
+                    if(this.chooser.getSelectedFile() != null && !INSTANCE.isModifyed)
                     {
                         INSTANCE.file = this.chooser.getSelectedFile();
                         if(!INSTANCE.file.isFile()) throw new Exception("Not a File");
@@ -225,6 +269,20 @@ public class AtiburcioTyler5 {
                         for(String s : this.dataImport) this.builder.append(s).append("\n");
                         INSTANCE.setTitle(INSTANCE.file.getName() + INSTANCE.TITLE_SUFIX);
                         INSTANCE.textArea.setText(this.builder.toString());
+                    }
+                    else if (INSTANCE.isModifyed)
+                    {
+                        if(INSTANCE.file != null) INSTANCE.saveData();
+                        else INSTANCE.saveDialog();
+                        
+                        INSTANCE.file = this.chooser.getSelectedFile();
+                        if(!INSTANCE.file.isFile()) throw new Exception("Not a File");
+                        this.fileScan = new Scanner(INSTANCE.file);
+                        while(this.fileScan.hasNext()) this.dataImport.add(this.fileScan.nextLine());
+                        for(String s : this.dataImport) this.builder.append(s).append("\n");
+                        INSTANCE.setTitle(INSTANCE.file.getName() + INSTANCE.TITLE_SUFIX);
+                        INSTANCE.textArea.setText(this.builder.toString());
+                        
                     }
                 }catch(Exception ex)
                 {
@@ -239,18 +297,63 @@ public class AtiburcioTyler5 {
             
         }
         
+        private void saveData()
+        {
+            PrintStream out  = null;
+                    try{
+                        out =  new PrintStream(INSTANCE.file);
+                        for(String s : copyDataToArray()) out.println(s);
+                        out.flush();
+                        out.close();
+                        INSTANCE.isModifyed = false;
+                    
+                            }catch(Exception ex)
+                            {
+                                JOptionPane.showMessageDialog(null, ex.getMessage(), "Error Opening File", JOptionPane.ERROR_MESSAGE);
+                            }
+        }
+        
         private class SaveDocumentListener implements ActionListener
         {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                if(INSTANCE.file == null) INSTANCE.saveDialog();
+                else
+                {
+                    INSTANCE.saveData();
+                }
             }
             
         }
         
         private void saveDialog()
         {
+            JFileChooser chooser = new JFileChooser();
+            PrintStream out  = null;
+            chooser.showSaveDialog(null);
+            this.file = chooser.getSelectedFile();
+            
+            //To attempt to limit the file extension type to a text file
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
+            chooser.setFileFilter(filter);
+            
+            try{
+                
+                if(file != null){
+                    out =  new PrintStream(this.file);
+                    for(String s : copyDataToArray()) out.println(s);
+                    out.flush();
+                    out.close();
+                    this.setTitle(this.file.getName()+TITLE_SUFIX);
+                    INSTANCE.isModifyed = false;
+                }
+                
+            }catch(Exception e)
+            {                    
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Error Saving File", JOptionPane.ERROR_MESSAGE);
+ 
+            }
             
         }
         
@@ -259,7 +362,7 @@ public class AtiburcioTyler5 {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                INSTANCE.saveDialog();
             }
             
         }
@@ -269,9 +372,48 @@ public class AtiburcioTyler5 {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                INSTANCE.endingAction();
             }
             
+        }
+        
+        private void endingAction()
+        {
+            INSTANCE.detectChanges();
+            if(INSTANCE.isModifyed)
+            {
+                //System.out.println(JOptionPane.showConfirmDialog(null, "Do you want to save unsaved changes?", "Hey User!", JOptionPane.YES_NO_CANCEL_OPTION));
+                switch(JOptionPane.showConfirmDialog(null, "Do you want to save changes?", "Hey User!", JOptionPane.YES_NO_CANCEL_OPTION))
+                {
+                    case 0:
+                    {
+                        if(this.file != null)
+                        {
+                            INSTANCE.saveData();
+                            INSTANCE.dispose();
+                            System.exit(0);
+                            break;
+                        }
+                    }
+                    
+                    case 1:
+                    {
+                        INSTANCE.dispose();
+                        System.exit(0);
+                        break;
+                    }
+                }
+                        
+                
+                //cancel op 2
+                //no op 1
+                //yes op 0
+            }
+            else
+            {
+                INSTANCE.dispose();
+                System.exit(0);
+            }
         }
         
         private ArrayList<String> copyDataToArray()
@@ -282,6 +424,64 @@ public class AtiburcioTyler5 {
             return temp;
         }
         
+        private class CloseWindowListener implements WindowListener {
+
+        public CloseWindowListener() {
+        }
+
+        @Override
+        public void windowOpened(WindowEvent e) {
+            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void windowClosing(WindowEvent e) {
+            INSTANCE.endingAction();
+        }
+
+        @Override
+        public void windowClosed(WindowEvent e) {
+            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void windowIconified(WindowEvent e) {
+            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void windowDeiconified(WindowEvent e) {
+            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void windowActivated(WindowEvent e) {
+            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void windowDeactivated(WindowEvent e) {
+            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
     }
+
+        private void detectChanges()
+        {
+            if(this.data == null) this.isModifyed = true;
+            else
+            {
+                for(char c : this.data) for(char v : this.textArea.getText().toCharArray()) 
+                    if(c != v)
+                    {
+                        this.isModifyed = true;
+                        break;
+                    }
+                    
+            }
+        }
+        
+    }
+
+    
 
 }
